@@ -94,11 +94,11 @@ int checkFreeSpaces()
 {
     int freeSpaces = 0;
 
-    for (int i = 0; i < 3; i++)
+    for (auto & i : board)
     {
-        for (int j = 0; j < 3; j++)
+        for (char j : i)
         {
-            if (board[i][j] == ' ')
+            if (j == ' ')
             {
                 freeSpaces++;
             }
@@ -155,11 +155,11 @@ void computerMove()
 char checkWinner()
 {
     // Check rows
-    for (int i = 0; i < 3; i++)
+    for (auto & i : board)
     {
-        if (board[i][0] == board[i][1] && board[i][0] == board[i][2] && board[i][0] != ' ')
+        if (i[0] == i[1] && i[0] == i[2] && i[0] != ' ')
         {
-            return board[i][0];
+            return i[0];
         }
     }
 
