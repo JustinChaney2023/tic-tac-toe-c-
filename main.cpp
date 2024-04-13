@@ -3,12 +3,14 @@
 #include <ctime>
 using namespace std;
 
+// Define the board
 char board[3][3] = {
     {' ', ' ', ' '}, 
     {' ', ' ', ' '}, 
     {' ', ' ', ' '}
 };
 
+// Define constants for players
 const char PLAYER = 'X';
 const char COMPUTER = 'O';
 char currentPlayer = PLAYER;
@@ -25,10 +27,12 @@ int main()
 {
     char winner = ' ';
 
+    // Main game loop
     for (int i = 0; i < 9; i++)
     {
         printBoard();
 
+        // Alternate between player and computer moves
         if (currentPlayer == PLAYER)
         {
             playerMove();
@@ -51,12 +55,14 @@ int main()
         }
     }
 
+    // Print final board and winner
     printBoard();
     printWinner(winner);
 
     return 0;
 }
 
+// Function to print the board
 void printBoard()
 {
     cout << "   |   |   " << endl;
@@ -69,7 +75,7 @@ void printBoard()
     cout << " " << board[2][0] << " | " << board[2][1] << " | " << board[2][2] << endl;
     cout << "   |   |   " << endl;
 
-    cout << endl << "Computer's moves (O): "; //added 
+    cout << endl << "Computer's moves (O): "; // Added: Displaying computer moves
     for (int i = 0; i < 3; i++)
     {
         for (int j = 0; j < 3; j++)
@@ -83,6 +89,7 @@ void printBoard()
     cout << endl;
 }
 
+// Function to check the number of free spaces on the board
 int checkFreeSpaces()
 {
     int freeSpaces = 0;
@@ -100,6 +107,7 @@ int checkFreeSpaces()
     return freeSpaces;
 }
 
+// Function for player's move
 void playerMove()
 {
     int row, column;
@@ -125,6 +133,7 @@ void playerMove()
     }
 }
 
+// Function for computer's move
 void computerMove()
 {
     srand(time(0));
@@ -142,6 +151,7 @@ void computerMove()
     }
 }
 
+// Function to check if there's a winner
 char checkWinner()
 {
     // Check rows
@@ -175,6 +185,7 @@ char checkWinner()
     return ' ';
 }
 
+// Function to print the winner
 void printWinner(char winner)
 {
     if (winner == PLAYER)
