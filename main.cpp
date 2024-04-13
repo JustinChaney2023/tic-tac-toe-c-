@@ -25,7 +25,7 @@ void printWinner(char);
 
 int main()
 {
-    char winner = ' ';
+    char winner;
 
     // Main game loop
     for (int i = 0; i < 9; i++)
