@@ -1,17 +1,19 @@
 #include <iostream>
 #include <string>
-//#include <cstdio>
+#include <ctime>
 using namespace std;
 
+char board[3][3] = {
+    {' ', ' ', ' '}, 
+    {' ', ' ', ' '}, 
+    {' ', ' ', ' '}
+};
 
-char board[3][3];
 const char PLAYER = 'X';
 const char COMPUTER = 'O';
 char currentPlayer = PLAYER;
-int row = -1;
-int column = -1;
 
-//void resetBoard();
+// Function declarations
 void printBoard();
 int checkFreeSpaces();
 void playerMove();
@@ -23,154 +25,155 @@ int main()
 {
     char winner = ' ';
 
-    for(int i = 0; i < 9; i++)
+    for (int i = 0; i < 9; i++)
     {
         printBoard();
 
-        playerMove();
-        winner = checkWinner();
-        if (winner != ' ' || checkFreeSpaces() == 0)
+        if (currentPlayer == PLAYER)
         {
-            break;
+            playerMove();
+            winner = checkWinner();
+            if (winner != ' ' || checkFreeSpaces() == 0)
+            {
+                break;
+            }
+            currentPlayer = COMPUTER;
         }
-
-        computerMove();
-        winner = checkWinner();
-        if (winner != ' ' || checkFreeSpaces() == 0)
+        else
         {
-            break;
+            computerMove();
+            winner = checkWinner();
+            if (winner != ' ' || checkFreeSpaces() == 0)
+            {
+                break;
+            }
+            currentPlayer = PLAYER;
         }
-        
     }
+
+    printBoard();
+    printWinner(winner);
 
     return 0;
 }
 
-//void resetBoard();
 void printBoard()
 {
     cout << "   |   |   " << endl;
-    cout << " " << board[0][0] << "  | " << board[0][1] << "  | " << board[0][2] << endl;
+    cout << " " << board[0][0] << " | " << board[0][1] << " | " << board[0][2] << endl;
     cout << "___|___|___" << endl;
     cout << "   |   |   " << endl;
-    cout << " " << board[1][0] << "  | " << board[1][1] << "  | " << board[1][2] << endl;
+    cout << " " << board[1][0] << " | " << board[1][1] << " | " << board[1][2] << endl;
     cout << "___|___|___" << endl;
     cout << "   |   |   " << endl;
-    cout << " " << board[2][0] << "  | " << board[2][1] << "  | " << board[2][2] << endl;
+    cout << " " << board[2][0] << " | " << board[2][1] << " | " << board[2][2] << endl;
     cout << "   |   |   " << endl;
 }
 
 int checkFreeSpaces()
 {
-    int freeSpaces = 9;
+    int freeSpaces = 0;
 
-    for(int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++)
     {
-        for(int j = 0; j < 3; j++)
+        for (int j = 0; j < 3; j++)
         {
-            if(board[i][j] != ' ')
+            if (board[i][j] == ' ')
             {
-                freeSpaces--;
+                freeSpaces++;
             }
         }
     }
     return freeSpaces;
 }
+
 void playerMove()
 {
-    while(true)
+    int row, column;
+    while (true)
     {
         cout << "Enter Row #(0-2): ";
         cin >> row;
         cout << "Enter Column #(0-2): ";
         cin >> column;
-        if (row < 0 || row > 2 || column < 0 || column > 2) 
+        if (row < 0 || row > 2 || column < 0 || column > 2)
         {
             cout << "Invalid input, try again." << endl;
         }
-        else if (board[row][column] != ' ') 
+        else if (board[row][column] != ' ')
         {
-                cout << "Tile is full, try again." << endl;
+            cout << "Tile is full, try again." << endl;
         }
-        else 
+        else
         {
+            board[row][column] = PLAYER;
             break;
         }
-
-        //reset values
-        row = -1;
-        column = -1;
-        cin.clear(); //clear error flags
-        cin.ignore(10000, '\n'); //discard values 
-        //(skips to the next new line \n up to 10000 char) already in input stream
     }
-    
 }
 
 void computerMove()
 {
     srand(time(0));
-    int x;
-    int y;
+    int x, y;
 
-    if(checkFreeSpaces() > 0)
+    if (checkFreeSpaces() > 0)
     {
         do
         {
             x = rand() % 3;
             y = rand() % 3;
         } while (board[x][y] != ' ');
-      
+
         board[x][y] = COMPUTER;
-    }
-    else
-    {
-        printWinner(' ');
     }
 }
 
 char checkWinner()
 {
-    //check rows
-   for(int i = 0; i < 3; i++)
-   {
-      if(board[i][0] == board[i][1] && board[i][0] == board[i][2])
-      {
-         return board[i][0];
-      }
-   }
-   //check columns
-   for(int i = 0; i < 3; i++)
-   {
-      if(board[0][i] == board[1][i] && board[0][i] == board[2][i])
-      {
-         return board[0][i];
-      }
-   }
-   //check diagonals
-   if(board[0][0] == board[1][1] && board[0][0] == board[2][2])
-   {
-      return board[0][0];
-   }
-   if(board[0][2] == board[1][1] && board[0][2] == board[2][0])
-   {
-      return board[0][2];
-   }
+    // Check rows
+    for (int i = 0; i < 3; i++)
+    {
+        if (board[i][0] == board[i][1] && board[i][0] == board[i][2] && board[i][0] != ' ')
+        {
+            return board[i][0];
+        }
+    }
 
-   return ' ';
+    // Check columns
+    for (int i = 0; i < 3; i++)
+    {
+        if (board[0][i] == board[1][i] && board[0][i] == board[2][i] && board[0][i] != ' ')
+        {
+            return board[0][i];
+        }
+    }
+
+    // Check diagonals
+    if (board[0][0] == board[1][1] && board[0][0] == board[2][2] && board[0][0] != ' ')
+    {
+        return board[0][0];
+    }
+    if (board[0][2] == board[1][1] && board[0][2] == board[2][0] && board[0][2] != ' ')
+    {
+        return board[0][2];
+    }
+
+    return ' ';
 }
 
 void printWinner(char winner)
 {
-    if(winner == PLAYER)
+    if (winner == PLAYER)
     {
         cout << "YOU WIN!" << endl;
     }
-    else if(winner == COMPUTER)
+    else if (winner == COMPUTER)
     {
         cout << "YOU LOSE!" << endl;
     }
-    else{
+    else
+    {
         cout << "IT'S A TIE!" << endl;
     }
 }
