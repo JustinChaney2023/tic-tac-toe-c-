@@ -68,6 +68,19 @@ void printBoard()
     cout << "   |   |   " << endl;
     cout << " " << board[2][0] << " | " << board[2][1] << " | " << board[2][2] << endl;
     cout << "   |   |   " << endl;
+
+    cout << endl << "Computer's moves (O): "; //added 
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            if (board[i][j] == COMPUTER)
+            {
+                cout << "(" << i << ", " << j << ") ";
+            }
+        }
+    }
+    cout << endl;
 }
 
 int checkFreeSpaces()
