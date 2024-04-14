@@ -16,6 +16,7 @@ const char COMPUTER = 'O';
 char currentPlayer = PLAYER;
 
 // Function declarations
+void resetBoard();
 void printBoard();
 int checkFreeSpaces();
 void playerMove();
@@ -25,41 +26,62 @@ void printWinner(char);
 
 int main()
 {
-    char winner;
+    char winner, response;
 
     // Main game loop
-    for (int i = 0; i < 9; i++)
+    do
     {
-        printBoard();
+        resetBoard();
+        for (int i = 0; i < 9; i++)
+        {
+            printBoard();
 
-        // Alternate between player and computer moves
-        if (currentPlayer == PLAYER)
-        {
-            playerMove();
-            winner = checkWinner();
-            if (winner != ' ' || checkFreeSpaces() == 0)
+            // Alternate between player and computer moves
+            if (currentPlayer == PLAYER)
             {
-                break;
+                playerMove();
+                winner = checkWinner();
+                if (winner != ' ' || checkFreeSpaces() == 0)
+                {
+                    break;
+                }
+                currentPlayer = COMPUTER;
             }
-            currentPlayer = COMPUTER;
-        }
-        else
-        {
-            computerMove();
-            winner = checkWinner();
-            if (winner != ' ' || checkFreeSpaces() == 0)
+            else
             {
-                break;
+                computerMove();
+                winner = checkWinner();
+                if (winner != ' ' || checkFreeSpaces() == 0)
+                {
+                    break;
+                }
+                currentPlayer = PLAYER;
             }
-            currentPlayer = PLAYER;
         }
-    }
 
     // Print final board and winner
     printBoard();
     printWinner(winner);
 
+    cout << "Would you like to play again? (Y/N): ";
+    cin >> response;
+
+    } while (response == 'Y' || response == 'y');
+
+    cout << "Thanks for playing!:D" << endl;
+
     return 0;
+}
+
+void resetBoard()
+{
+    for(int i = 0; i < 3; i++)
+    {
+        for(int j = 0; j < 3; j++)
+        {
+            board[i][j] = ' '; // when resetBoard() is called each element of the array will be an empty space
+        }
+    }
 }
 
 // Function to print the board
