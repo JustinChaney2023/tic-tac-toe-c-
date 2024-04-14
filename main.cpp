@@ -1,14 +1,12 @@
 #include <iostream>
-#include <string>
 #include <ctime>
-#include <limits>
 using namespace std;
 
 // Define the board
 char board[3][3] = {
-    {' ', ' ', ' '},
-    {' ', ' ', ' '},
-    {' ', ' ', ' '}
+        {' ', ' ', ' '},
+        {' ', ' ', ' '},
+        {' ', ' ', ' '}
 };
 
 // Define constants for players
@@ -153,20 +151,18 @@ void playerMove()
     while (true)
     {
         cout << "Enter Row #(1-3): ";
-        if (!(cin >> row) || row < 1 || row > 3)
+        cin >> row;
+        if (row < 1 || row > 3)
         {
-            cout << "Invalid input for row. Please enter a number between 1 and 3." << endl;
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Invalid input. Please enter a number between 1 and 3." << endl;
             continue;
         }
 
         cout << "Enter Column #(1-3): ";
-        if (!(cin >> column) || column < 1 || column > 3)
+        cin >> column;
+        if (column < 1 || column > 3)
         {
-            cout << "Invalid input for column. Please enter a number between 1 and 3." << endl;
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Invalid input. Please enter a number between 1 and 3." << endl;
             continue;
         }
 
@@ -184,6 +180,7 @@ void playerMove()
         }
     }
 }
+
 
 // Function for computer's move
 void computerMove()
