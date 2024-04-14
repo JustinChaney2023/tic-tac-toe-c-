@@ -224,7 +224,7 @@ void printWinner(char winner)
     else
     {
         cout << "          IT'S A TIE!\n"
-                "|\\      _,,,---,,_\n"
+                "       |\\_,,,---,,_\n"
                 "ZZZzz /,`.-'`'    -.  ;-;;,_\n"
                 "     |,4-  ) )-,_. ,\\ (  `'-'\n"
                 "    '---''(_/--'  `-'\\_)" << endl;
