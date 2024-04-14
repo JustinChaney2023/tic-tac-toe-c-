@@ -1,295 +1,398 @@
 #include <iostream>
-#include <vector>
-#include <cstdlib>
-#include <ctime>
-
+#include <cstdlib> // For rand() and srand()
+#include <ctime>   // For time()
+#include <vector>  // For storing past moves
 using namespace std;
 
-class TicTacToe {
-private:
-    char board[3][3]{};
-    char currentPlayer;
-    vector<pair<int, int>> playerMoves;
-    vector<pair<int, int>> computerMoves;
+// Define the board
+char board[3][3] = {
+        {' ', ' ', ' '},
+        {' ', ' ', ' '},
+        {' ', ' ', ' '}};
 
-public:
-    TicTacToe() {
-        resetBoard();
-        currentPlayer = 'X'; // Player always starts the game
-    }
+// Define constants for players
+const char PLAYER = 'X';
+const char COMPUTER = 'O'; // Computer is also 'O'
+auto currentPlayer = PLAYER;
+auto currentPlayerPvP = PLAYER; // Player vs Player current player
+auto currentPlayerPvC = PLAYER; // Player vs Computer current player
 
-    void resetBoard() {
-        for (auto & i : board) {
-            for (char & j : i) {
-                j = ' ';
+// Store past moves for both players
+vector<pair<int, int>> playerMoves;
+vector<pair<int, int>> computerMoves;
+
+// Function declarations
+void resetBoard();
+void printBoard();
+void printPastMoves(char mode);
+int checkFreeSpaces();
+void playerMove();
+void player2Move();
+void computerMove();
+char checkWinner();
+void printWinner(char winner, char chosenMode);
+
+int main()
+{
+    char winner, playAgain;
+
+    // Seed the random number generator
+    srand(time(nullptr));
+
+    // Outer loop to handle returning to the main menu
+    do
+    {
+        char chosenMode = '0'; // Initialize with an invalid value
+
+        if (chosenMode == '0')
+        {
+            cout << " _   _      _             _             \n"
+                    "| | (_)    | |           | |            \n"
+                    "| |_ _  ___| |_ __ _  ___| |_ ___   ___ \n"
+                    "| __| |/ __| __/ _` |/ __| __/ _ \\ / _ \\\n"
+                    "| |_| | (__| || (_| | (__| || (_) |  __/\n"
+                    " \\__|_|\\___|\\__\\__,_|\\___|\\__\\___/ \\___|\n"
+                    "\n"
+                    "\"============= Tic Tac Toe =============\"\n"
+                 << endl;
+
+            cout << "Select game mode:" << endl;
+            cout << "1. Player vs Player" << endl;
+            cout << "2. Player vs Computer" << endl;
+            cout << "3. Quit" << endl;
+            cout << "Enter your choice: ";
+            cin >> chosenMode;
+
+            switch (chosenMode)
+            {
+                case '1':
+                    cout << "Mode chosen: Player vs Player" << endl;
+                    break;
+                case '2':
+                    cout << "Mode chosen: Player vs Computer" << endl;
+                    break;
+                case '3':
+                    cout << "Exiting the game. Thanks for playing! :D" << endl;
+                    return 0; // Exit the program
+                default:
+                    cout << "Invalid choice. Please choose again." << endl;
+                    continue; // Go back to the beginning of the outer loop
             }
         }
-    }
 
-    void printBoard() const {
-        // Print the board
-        cout << "   |   |   " << endl;
-        for (int i = 0; i < 3; ++i) {
-            cout << " " << board[i][0] << " | " << board[i][1] << " | " << board[i][2] << endl;
-            if (i < 2)
-                cout << "---|---|---" << endl;
-        }
-        cout << "   |   |   " << endl;
+        // Inner loop for playing the game
+        do
+        {
+            resetBoard(); // Reset the game board
+            currentPlayer = PLAYER;         // Reset the current player
+            currentPlayerPvP = PLAYER;     // Reset the current player for Player vs Player mode
+            currentPlayerPvC = PLAYER;    // Reset the current player for Player vs Computer mode
 
-        // Print previous moves
-        cout << "Player's moves (X): ";
-        for (const auto& move : playerMoves) {
-            cout << "(" << move.first + 1 << ", " << move.second + 1 << ") ";
-        }
-        cout << endl;
+            // Clear past moves
+            playerMoves.clear();
+            computerMoves.clear();
 
-        cout << "Computer's moves (O): ";
-        for (const auto& move : computerMoves) {
-            cout << "(" << move.first + 1 << ", " << move.second + 1 << ") ";
-        }
-        cout << endl;
-    }
-
-    bool playerMove(int row, int col) {
-        if (row < 0 || row >= 3 || col < 0 || col >= 3 || board[row][col] != ' ')
-            return false;
-        board[row][col] = currentPlayer;
-        playerMoves.emplace_back(row, col);
-        return true;
-    }
-
-    void switchPlayer() {
-        currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
-    }
-
-    [[nodiscard]] char getCurrentPlayer() const {
-        return currentPlayer;
-    }
-
-    [[nodiscard]] bool isBoardFull() const {
-        for (auto i : board) {
-            for (int j = 0; j < 3; ++j) {
-                if (i[j] == ' ')
-                    return false;
-            }
-        }
-        return true;
-    }
-
-    [[nodiscard]] char checkWinner() const {
-        // Check rows
-        for (auto i : board) {
-            if (i[0] == i[1] && i[0] == i[2] && i[0] != ' ')
-                return i[0];
-        }
-
-        // Check columns
-        for (int i = 0; i < 3; ++i) {
-            if (board[0][i] == board[1][i] && board[0][i] == board[2][i] && board[0][i] != ' ')
-                return board[0][i];
-        }
-
-        // Check diagonals
-        if (board[0][0] == board[1][1] && board[0][0] == board[2][2] && board[0][0] != ' ')
-            return board[0][0];
-        if (board[0][2] == board[1][1] && board[0][2] == board[2][0] && board[0][2] != ' ')
-            return board[0][2];
-
-        return ' ';
-    }
-
-    void computerMoveNormal() {
-        // Check for winning moves
-        for (int i = 0; i < 3; ++i) {
-            for (int j = 0; j < 3; ++j) {
-                if (board[i][j] == ' ') {
-                    board[i][j] = currentPlayer;
-                    if (checkWinner() == currentPlayer) {
-                        computerMoves.emplace_back(i, j);
-                        return;
+            // Game loop
+            do
+            {
+                if (chosenMode == '1')
+                {
+                    cout << endl;
+                    cout << "\n"
+                         << endl;
+                    printBoard();
+                    printPastMoves(chosenMode);
+                    if (currentPlayerPvP == PLAYER)
+                    {
+                        cout << "Player 1's Moves (X): ";
+                        playerMove();
                     }
-                    board[i][j] = ' '; // Undo the move
-                }
-            }
-        }
-
-        // Check for blocking opponent's winning moves
-        char opponent = (currentPlayer == 'X') ? 'O' : 'X';
-        for (int i = 0; i < 3; ++i) {
-            for (int j = 0; j < 3; ++j) {
-                if (board[i][j] == ' ') {
-                    board[i][j] = opponent;
-                    if (checkWinner() == opponent) {
-                        board[i][j] = currentPlayer;
-                        computerMoves.emplace_back(i, j);
-                        return;
-                    }
-                    board[i][j] = ' '; // Undo the move
-                }
-            }
-        }
-
-        // If no winning or blocking moves, make a random move
-        srand(time(nullptr));
-        int x, y;
-        do {
-            x = rand() % 3;
-            y = rand() % 3;
-        } while (board[x][y] != ' ');
-
-        board[x][y] = currentPlayer;
-        computerMoves.emplace_back(x, y);
-    }
-
-    void computerMoveHard() {
-        int bestScore = -1000;
-        pair<int, int> bestMove;
-        for (int i = 0; i < 3; ++i) {
-            for (int j = 0; j < 3; ++j) {
-                if (board[i][j] == ' ') {
-                    board[i][j] = currentPlayer;
-                    int score = minimax(board, 0, false, -1000, 1000);
-                    board[i][j] = ' ';
-                    if (score > bestScore) {
-                        bestScore = score;
-                        bestMove = {i, j};
+                    else
+                    {
+                        cout << "Player 2's Moves (O): ";
+                        player2Move();
                     }
                 }
-            }
-        }
-        board[bestMove.first][bestMove.second] = currentPlayer;
-        computerMoves.emplace_back(bestMove);
-    }
-
-    int minimax(char board[3][3], int depth, bool isMaximizingPlayer, int alpha, int beta) {
-        char result = checkWinner();
-        if (result != ' ') {
-            if (result == 'X') return -10 + depth;
-            else if (result == 'O') return 10 - depth;
-            else return 0;
-        }
-
-        if (isBoardFull()) return 0;
-
-        if (isMaximizingPlayer) {
-            int maxScore = -1000;
-            for (int i = 0; i < 3; ++i) {
-                for (int j = 0; j < 3; ++j) {
-                    if (board[i][j] == ' ') {
-                        board[i][j] = 'O';
-                        int score = minimax(board, depth + 1, false, alpha, beta);
-                        maxScore = max(maxScore, score);
-                        alpha = max(alpha, score);
-                        board[i][j] = ' ';
-                        if (beta <= alpha) break; // Pruning
+                else if (chosenMode == '2')
+                {
+                    cout << endl;
+                    cout << "\n"
+                         << endl;
+                    printBoard();
+                    printPastMoves(chosenMode);
+                    if (currentPlayerPvC == PLAYER)
+                    {
+                        cout << "Player's Moves (X): ";
+                        playerMove();
+                    }
+                    else
+                    {
+                        cout << "Computer's Moves (O): ";
+                        computerMove();
                     }
                 }
-            }
-            return maxScore;
-        } else {
-            int minScore = 1000;
-            for (int i = 0; i < 3; ++i) {
-                for (int j = 0; j < 3; ++j) {
-                    if (board[i][j] == ' ') {
-                        board[i][j] = 'X';
-                        int score = minimax(board, depth + 1, true, alpha, beta);
-                        minScore = min(minScore, score);
-                        beta = min(beta, score);
-                        board[i][j] = ' ';
-                        if (beta <= alpha) break; // Pruning
-                    }
-                }
-            }
-            return minScore;
-        }
-    }
-};
 
-void printMenu() {
-    cout << " _   _      _             _             \n"
-            "| | (_)    | |           | |            \n"
-            "| |_ _  ___| |_ __ _  ___| |_ ___   ___ \n"
-            "| __| |/ __| __/ _` |/ __| __/ _ \\ / _ \\\n"
-            "| |_| | (__| || (_| | (__| || (_) |  __/\n"
-            " \\__|_|\\___|\\__\\__,_|\\___|\\__\\___/ \\___|\n"
-            "\n"
-            "\"============= Tic Tac Toe =============\"\n"
-            "" << endl;
-    cout << "1. Player VS. Computer" << endl;
-    cout << "2. Quit" << endl;
-    cout << "\n";
-    cout << "Enter your choice: ";
+                winner = checkWinner();
+                if (chosenMode == '1')
+                {
+                    currentPlayerPvP = (currentPlayerPvP == PLAYER) ? 'O' : PLAYER;
+                }
+                else if (chosenMode == '2')
+                {
+                    currentPlayerPvC = (currentPlayerPvC == PLAYER) ? COMPUTER : PLAYER;
+                }
+
+            } while (winner == ' ' && checkFreeSpaces() > 0); // Continue game loop until a winner is found or there are no more free spaces
+
+            // Print final board and winner
+            cout << endl;
+            cout << "Final Board:" << endl;
+            printBoard();
+            printPastMoves(chosenMode);
+            printWinner(winner, chosenMode);
+
+            // Ask to play again
+            cout << "Do you want to play again? (Y/N): ";
+            cin >> playAgain;
+
+        } while (playAgain == 'Y' || playAgain == 'y');
+
+    } while (true); // Keep asking for mode choice until the user selects to quit
 }
 
-void printDifficultyMenu() {
-    cout << "\nChoose difficulty:" << endl;
-    cout << "1. Normal" << endl;
-    cout << "2. Hard (Minimax with alpha-beta pruning)" << endl;
-    cout << "\nEnter your choice: ";
+void resetBoard()
+{
+    for (auto &i : board)
+    {
+        for (char &j : i)
+        {
+            j = ' ';
+        }
+    }
 }
 
-int main() {
-    char choice;
-    do {
-        printMenu();
-        cin >> choice;
+void printBoard()
+{
+    cout << endl;
+    cout << "   |   |   " << endl;
+    cout << " " << board[0][0] << " | " << board[0][1] << " | " << board[0][2] << endl;
+    cout << "---|---|---" << endl;
+    cout << " " << board[1][0] << " | " << board[1][1] << " | " << board[1][2] << endl;
+    cout << "---|---|---" << endl;
+    cout << " " << board[2][0] << " | " << board[2][1] << " | " << board[2][2] << endl;
+    cout << "   |   |   " << endl;
+}
 
-        switch (choice) {
-            case '1': {
-                char difficultyChoice;
-                do {
-                    printDifficultyMenu();
-                    cin >> difficultyChoice;
-                    TicTacToe game;
-                    int row, col;
-                    char winner;
-                    while (true) {
-                        game.printBoard();
-                        cout << "Current player: " << game.getCurrentPlayer() << endl;
-                        if (game.getCurrentPlayer() == 'X') {
-                            cout << "Enter row and column (1-3) for your move: ";
-                            cin >> row >> col;
-                            --row; --col;
-                            if (game.playerMove(row, col)) {
-                                winner = game.checkWinner();
-                                if (winner != ' ' || game.isBoardFull()) break;
-                                game.switchPlayer();
-                            } else {
-                                cout << "Invalid move! Try again." << endl;
-                            }
-                        } else {
-                            if (difficultyChoice == '1') {
-                                game.computerMoveNormal();
-                            } else if (difficultyChoice == '2') {
-                                game.computerMoveHard();
-                            }
-                            winner = game.checkWinner();
-                            if (winner != ' ' || game.isBoardFull()) break;
-                            game.switchPlayer();
-                        }
-                    }
-
-                    game.printBoard();
-                    if (winner == 'X') cout << "Congratulations! You win!" << endl;
-                    else if (winner == 'O') cout << "Computer wins! Better luck next time!" << endl;
-                    else cout << "It's a tie!\n"
-                                 " |\\__/,|   (`\\\n"
-                                 " |_ _  |.--.) )\n"
-                                 " ( T   )     /\n"
-                                 "(((^_(((/(((_/"<< endl;
-
-                    cout << "Do you want to play again? (Y/N): ";
-                    cin >> choice;
-                } while (choice == 'Y' || choice == 'y');
-                break;
-            }
-            case '2':
-                cout << "Thanks for playing!" << endl;
-                break;
-            default:
-                cout << "Invalid choice! Please try again." << endl;
+void printPastMoves(char mode)
+{
+    cout << "Past Moves:" << endl;
+    if (mode == '1') // Player vs Player mode
+    {
+        cout << "Player 1 (X): ";
+        for (auto &move : playerMoves)
+        {
+            cout << "(" << move.first + 1 << "," << move.second + 1 << ") ";
         }
-    } while (choice != '2');
+        cout << endl;
+        cout << "Player 2 (O): ";
+        for (auto &move : computerMoves)
+        {
+            cout << "(" << move.first + 1 << "," << move.second + 1 << ") ";
+        }
+    }
+    else if (mode == '2') // Player vs Computer mode
+    {
+        cout << "Player's Moves (X): ";
+        for (auto &move : playerMoves)
+        {
+            cout << "(" << move.first + 1 << "," << move.second + 1 << ") ";
+        }
+        cout << endl;
+        cout << "Computer's Moves (O): ";
+        for (auto &move : computerMoves)
+        {
+            cout << "(" << move.first + 1 << "," << move.second + 1 << ") ";
+        }
+    }
+    cout << endl;
+}
 
-    return 0;
+int checkFreeSpaces()
+{
+    int freeSpaces = 0;
+
+    for (auto &i : board)
+    {
+        for (char j : i)
+        {
+            if (j == ' ')
+            {
+                freeSpaces++;
+            }
+        }
+    }
+    return freeSpaces;
+}
+
+void playerMove()
+{
+    int row, column;
+    while (true)
+    {
+        cout << "Enter Row and Column #(1-3): ";
+        cin >> row;
+        if (row < 1 || row > 3)
+        {
+            cout << "Invalid input. Please enter a number between 1 and 3." << endl;
+            continue;
+        }
+
+        cin >> column;
+        if (column < 1 || column > 3)
+        {
+            cout << "Invalid input. Please enter a number between 1 and 3." << endl;
+            continue;
+        }
+
+        row--;
+        column--;
+
+        if (board[row][column] != ' ')
+        {
+            cout << "Tile is full, try again." << endl;
+        }
+        else
+        {
+            board[row][column] = PLAYER;
+            playerMoves.push_back(make_pair(row, column));
+            break;
+        }
+    }
+}
+
+void player2Move()
+{
+    int row, column;
+    while (true)
+    {
+        cout << "Enter Row and Column #(1-3): ";
+        cin >> row;
+        if (row < 1 || row > 3)
+        {
+            cout << "Invalid input. Please enter a number between 1 and 3." << endl;
+            continue;
+        }
+
+        cin >> column;
+        if (column < 1 || column > 3)
+        {
+            cout << "Invalid input. Please enter a number between 1 and 3." << endl;
+            continue;
+        }
+
+        row--;
+        column--;
+
+        if (board[row][column] != ' ')
+        {
+            cout << "Tile is full, try again." << endl;
+        }
+        else
+        {
+            board[row][column] = 'O';
+            computerMoves.push_back(make_pair(row, column));
+            break;
+        }
+    }
+}
+
+void computerMove()
+{
+    int row, column;
+    while (true)
+    {
+        // Generate random row and column indices
+        row = rand() % 3;
+        column = rand() % 3;
+
+        // Check if the selected position is empty
+        if (board[row][column] == ' ')
+        {
+            board[row][column] = COMPUTER;
+            computerMoves.push_back(make_pair(row, column));
+            break;
+        }
+    }
+}
+
+char checkWinner()
+{
+    for (auto &i : board)
+    {
+        if (i[0] == i[1] && i[0] == i[2] && i[0] != ' ')
+        {
+            return i[0];
+        }
+    }
+
+    for (int i = 0; i < 3; i++)
+    {
+        if (board[0][i] == board[1][i] && board[0][i] == board[2][i] && board[0][i] != ' ')
+        {
+            return board[0][i];
+        }
+    }
+
+    if (board[0][0] == board[1][1] && board[0][0] == board[2][2] && board[0][0] != ' ')
+    {
+        return board[0][0];
+    }
+    if (board[0][2] == board[1][1] && board[0][2] == board[2][0] && board[0][2] != ' ')
+    {
+        return board[0][2];
+    }
+
+    return ' ';
+}
+
+void printWinner(char winner, char chosenMode)
+{
+    if (chosenMode == '1') // Player vs Player mode
+    {
+        if (winner == PLAYER)
+        {
+            cout << "Player 1 wins!" << endl;
+        }
+        else if (winner == 'O')
+        {
+            cout << "Player 2 wins!" << endl;
+        }
+        else
+        {
+            cout << "          IT'S A TIE!\n"
+                    "       |\\_,,,---,,_\n"
+                    "ZZZzz /,`.-'`'    -.  ;-;;,_\n"
+                    "     |,4-  ) )-,_. ,\\ (  `'-'\n"
+                    "    '---''(_/--'  `-'\\_)" << endl;
+        }
+    }
+    else if (chosenMode == '2') // Player vs Computer mode
+    {
+        if (winner == PLAYER)
+        {
+            cout << "Congratulations! You win!" << endl;
+        }
+        else if (winner == COMPUTER)
+        {
+            cout << "Computer wins! Better luck next time!" << endl;
+        }
+        else
+        {
+            cout << "          IT'S A TIE!\n"
+                    "       |\\_,,,---,,_\n"
+                    "ZZZzz /,`.-'`'    -.  ;-;;,_\n"
+                    "     |,4-  ) )-,_. ,\\ (  `'-'\n"
+                    "    '---''(_/--'  `-'\\_)" << endl;
+        }
+    }
 }
