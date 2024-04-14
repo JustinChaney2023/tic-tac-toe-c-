@@ -75,6 +75,18 @@ void printBoard()
     cout << " " << board[2][0] << " | " << board[2][1] << " | " << board[2][2] << endl;
     cout << "   |   |   " << endl;
 
+    cout << endl << "Player's moves (X): ";
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            if (board[i][j] == PLAYER)
+            {
+                cout << "(" << i + 1 << ", " << j + 1 << ") ";
+            }
+        }
+    }
+
     cout << endl << "Computer's moves (O): "; // Added: Displaying computer moves
     for (int i = 0; i < 3; i++)
     {
@@ -82,7 +94,7 @@ void printBoard()
         {
             if (board[i][j] == COMPUTER)
             {
-                cout << "(" << i << ", " << j << ") ";
+                cout << "(" << i + 1 << ", " << j + 1 << ") "; // Increment by 1 to display 1-3
             }
         }
     }
