@@ -68,18 +68,18 @@ int main()
 
     } while (response == 'Y' || response == 'y');
 
-    cout << "Thanks for playing!:D" << endl;
+    cout << "Thanks for playing! :D" << endl;
 
     return 0;
 }
 
 void resetBoard()
 {
-    for(int i = 0; i < 3; i++)
+    for(auto & i : board)
     {
-        for(int j = 0; j < 3; j++)
+        for(char & j : i)
         {
-            board[i][j] = ' '; // when resetBoard() is called each element of the array will be an empty space
+            j = ' '; // when resetBoard() is called each element of the array will be an empty space
         }
     }
 }
@@ -111,15 +111,12 @@ void printBoard()
 
     cout << endl << "Computer's moves (O): "; // Added: Displaying computer moves
     for (int i = 0; i < 3; i++)
-    {
-        for (int j = 0; j < 3; j++)
-        {
-            if (board[i][j] == COMPUTER)
-            {
-                cout << "(" << i + 1 << ", " << j + 1 << ") "; // Increment by 1 to display 1-3
-            }
+        for (int j = 0; j < 3; j++) {
+            if (board[i][j] != COMPUTER) continue;
+            cout << "(" << i + 1 << ", " << j + 1 << ") "; // Increment by 1 to display 1-3
         }
-    }
+
+
     cout << endl;
 }
 
