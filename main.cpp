@@ -5,8 +5,8 @@ using namespace std;
 
 // Define the board
 char board[3][3] = {
-    {' ', ' ', ' '}, 
-    {' ', ' ', ' '}, 
+    {' ', ' ', ' '},
+    {' ', ' ', ' '},
     {' ', ' ', ' '}
 };
 
@@ -136,19 +136,42 @@ void playerMove()
 // Function for computer's move
 void computerMove()
 {
+    // Check for winning moves
+    for (auto & i : board) {
+        for (char & j : i) {
+            if (j == ' ') {
+                j = COMPUTER;
+                if (checkWinner() == COMPUTER) {
+                    return;
+                }
+                j = ' '; // Undo the move
+            }
+        }
+    }
+
+    // Check for blocking opponent's winning moves
+    for (auto & i : board) {
+        for (char & j : i) {
+            if (j == ' ') {
+                j = PLAYER;
+                if (checkWinner() == PLAYER) {
+                    j = COMPUTER;
+                    return;
+                }
+                j = ' '; // Undo the move
+            }
+        }
+    }
+
+    // If no winning or blocking moves, make a random move
     srand(time(0));
     int x, y;
+    do {
+        x = rand() % 3;
+        y = rand() % 3;
+    } while (board[x][y] != ' ');
 
-    if (checkFreeSpaces() > 0)
-    {
-        do
-        {
-            x = rand() % 3;
-            y = rand() % 3;
-        } while (board[x][y] != ' ');
-
-        board[x][y] = COMPUTER;
-    }
+    board[x][y] = COMPUTER;
 }
 
 // Function to check if there's a winner
