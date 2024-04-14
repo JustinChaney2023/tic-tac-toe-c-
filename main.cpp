@@ -113,10 +113,12 @@ void playerMove()
     int row, column;
     while (true)
     {
-        cout << "Enter Row #(0-2): ";
+        cout << "Enter Row #(1-3): ";
         cin >> row;
-        cout << "Enter Column #(0-2): ";
+        cout << "Enter Column #(1-3): ";
         cin >> column;
+        row--; // Decrement by 1 to convert from 1-3 to 0-2
+        column--; // Decrement by 1 to convert from 1-3 to 0-2
         if (row < 0 || row > 2 || column < 0 || column > 2)
         {
             cout << "Invalid input, try again." << endl;
