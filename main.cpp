@@ -98,7 +98,7 @@ public:
         return ' ';
     }
 
-    void computerMove() {
+    void computerMoveNormal() {
         // Check for winning moves
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 3; ++j) {
@@ -140,6 +140,69 @@ public:
         board[x][y] = currentPlayer;
         computerMoves.emplace_back(x, y);
     }
+
+    void computerMoveHard() {
+        int bestScore = -1000;
+        pair<int, int> bestMove;
+        for (int i = 0; i < 3; ++i) {
+            for (int j = 0; j < 3; ++j) {
+                if (board[i][j] == ' ') {
+                    board[i][j] = currentPlayer;
+                    int score = minimax(board, 0, false, -1000, 1000);
+                    board[i][j] = ' ';
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = {i, j};
+                    }
+                }
+            }
+        }
+        board[bestMove.first][bestMove.second] = currentPlayer;
+        computerMoves.emplace_back(bestMove);
+    }
+
+    int minimax(char board[3][3], int depth, bool isMaximizingPlayer, int alpha, int beta) {
+        char result = checkWinner();
+        if (result != ' ') {
+            if (result == 'X') return -10 + depth;
+            else if (result == 'O') return 10 - depth;
+            else return 0;
+        }
+
+        if (isBoardFull()) return 0;
+
+        if (isMaximizingPlayer) {
+            int maxScore = -1000;
+            for (int i = 0; i < 3; ++i) {
+                for (int j = 0; j < 3; ++j) {
+                    if (board[i][j] == ' ') {
+                        board[i][j] = 'O';
+                        int score = minimax(board, depth + 1, false, alpha, beta);
+                        maxScore = max(maxScore, score);
+                        alpha = max(alpha, score);
+                        board[i][j] = ' ';
+                        if (beta <= alpha) break; // Pruning
+                    }
+                }
+            }
+            return maxScore;
+        } else {
+            int minScore = 1000;
+            for (int i = 0; i < 3; ++i) {
+                for (int j = 0; j < 3; ++j) {
+                    if (board[i][j] == ' ') {
+                        board[i][j] = 'X';
+                        int score = minimax(board, depth + 1, true, alpha, beta);
+                        minScore = min(minScore, score);
+                        beta = min(beta, score);
+                        board[i][j] = ' ';
+                        if (beta <= alpha) break; // Pruning
+                    }
+                }
+            }
+            return minScore;
+        }
+    }
 };
 
 void printMenu() {
@@ -158,6 +221,13 @@ void printMenu() {
     cout << "Enter your choice: ";
 }
 
+void printDifficultyMenu() {
+    cout << "\nChoose difficulty:" << endl;
+    cout << "1. Normal" << endl;
+    cout << "2. Hard (Minimax with alpha-beta pruning)" << endl;
+    cout << "\nEnter your choice: ";
+}
+
 int main() {
     char choice;
     do {
@@ -166,8 +236,10 @@ int main() {
 
         switch (choice) {
             case '1': {
-                char playAgain;
+                char difficultyChoice;
                 do {
+                    printDifficultyMenu();
+                    cin >> difficultyChoice;
                     TicTacToe game;
                     int row, col;
                     char winner;
@@ -186,7 +258,11 @@ int main() {
                                 cout << "Invalid move! Try again." << endl;
                             }
                         } else {
-                            game.computerMove();
+                            if (difficultyChoice == '1') {
+                                game.computerMoveNormal();
+                            } else if (difficultyChoice == '2') {
+                                game.computerMoveHard();
+                            }
                             winner = game.checkWinner();
                             if (winner != ' ' || game.isBoardFull()) break;
                             game.switchPlayer();
@@ -203,11 +279,10 @@ int main() {
                                  "(((^_(((/(((_/"<< endl;
 
                     cout << "Do you want to play again? (Y/N): ";
-                    cin >> playAgain;
-                } while (playAgain == 'Y' || playAgain == 'y');
+                    cin >> choice;
+                } while (choice == 'Y' || choice == 'y');
                 break;
             }
-
             case '2':
                 cout << "Thanks for playing!" << endl;
                 break;
