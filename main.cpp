@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <ctime>
+#include <limits>
 using namespace std;
 
 // Define the board
@@ -13,7 +14,7 @@ char board[3][3] = {
 // Define constants for players
 const char PLAYER = 'X';
 const char COMPUTER = 'O';
-char currentPlayer = PLAYER;
+auto currentPlayer = PLAYER;
 
 // Function declarations
 void resetBoard();
@@ -32,6 +33,7 @@ int main()
     do
     {
         resetBoard();
+        currentPlayer = PLAYER; // Set currentPlayer to PLAYER initially
         for (int i = 0; i < 9; i++)
         {
             printBoard();
@@ -59,12 +61,12 @@ int main()
             }
         }
 
-    // Print final board and winner
-    printBoard();
-    printWinner(winner);
+        // Print final board and winner
+        printBoard();
+        printWinner(winner);
 
-    cout << "Would you like to play again? (Y/N): ";
-    cin >> response;
+        cout << "Would you like to play again? (Y/N): ";
+        cin >> response;
 
     } while (response == 'Y' || response == 'y');
 
@@ -84,19 +86,21 @@ void resetBoard()
     }
 }
 
+#include <cstdlib> // Include the header for system()
+
 // Function to print the board
 void printBoard()
 {
+    // Print the board
     cout << "   |   |   " << endl;
     cout << " " << board[0][0] << " | " << board[0][1] << " | " << board[0][2] << endl;
-    cout << "___|___|___" << endl;
-    cout << "   |   |   " << endl;
+    cout << "---|---|---" << endl;
     cout << " " << board[1][0] << " | " << board[1][1] << " | " << board[1][2] << endl;
-    cout << "___|___|___" << endl;
-    cout << "   |   |   " << endl;
+    cout << "---|---|---" << endl;
     cout << " " << board[2][0] << " | " << board[2][1] << " | " << board[2][2] << endl;
     cout << "   |   |   " << endl;
 
+    // Print player's moves
     cout << endl << "Player's moves (X): ";
     for (int i = 0; i < 3; i++)
     {
@@ -109,13 +113,17 @@ void printBoard()
         }
     }
 
-    cout << endl << "Computer's moves (O): "; // Added: Displaying computer moves
+    cout << endl << "Computer's moves (O): ";
     for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++) {
-            if (board[i][j] != COMPUTER) continue;
-            cout << "(" << i + 1 << ", " << j + 1 << ") "; // Increment by 1 to display 1-3
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            if (board[i][j] == COMPUTER)
+            {
+                cout << "(" << i + 1 << ", " << j + 1 << ") ";
+            }
         }
-
+    }
 
     cout << endl;
 }
@@ -138,23 +146,34 @@ int checkFreeSpaces()
     return freeSpaces;
 }
 
-// Function for player's move
+// Function for player's move with input validation
 void playerMove()
 {
     int row, column;
     while (true)
     {
         cout << "Enter Row #(1-3): ";
-        cin >> row;
+        if (!(cin >> row) || row < 1 || row > 3)
+        {
+            cout << "Invalid input for row. Please enter a number between 1 and 3." << endl;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            continue;
+        }
+
         cout << "Enter Column #(1-3): ";
-        cin >> column;
+        if (!(cin >> column) || column < 1 || column > 3)
+        {
+            cout << "Invalid input for column. Please enter a number between 1 and 3." << endl;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            continue;
+        }
+
         row--; // Decrement by 1 to convert from 1-3 to 0-2
         column--; // Decrement by 1 to convert from 1-3 to 0-2
-        if (row < 0 || row > 2 || column < 0 || column > 2)
-        {
-            cout << "Invalid input, try again." << endl;
-        }
-        else if (board[row][column] != ' ')
+
+        if (board[row][column] != ' ')
         {
             cout << "Tile is full, try again." << endl;
         }
