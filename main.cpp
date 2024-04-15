@@ -2,6 +2,7 @@
 #include <cstdlib> // For rand() and srand()
 #include <ctime>   // For time()
 #include <vector>  // For storing past moves
+#include <climits> // For INT_MIN and INT_MAX
 using namespace std;
 
 // Define the board
@@ -22,15 +23,16 @@ vector<pair<int, int>> playerMoves;
 vector<pair<int, int>> computerMoves;
 
 // Function declarations
-void resetBoard();
-void printBoard();
-void printPastMoves(char mode);
-int checkFreeSpaces();
-void playerMove();
-void player2Move();
-void computerMove();
-char checkWinner();
-void printWinner(char winner, char chosenMode);
+void resetBoard(); // Resets the game board
+void printBoard(); // Prints the current state of the game board
+void printPastMoves(char mode); // Prints the past moves made by players
+int checkFreeSpaces(); // Checks the number of empty spaces left on the board
+void playerMove(); // Handles player's move in Player vs Player mode
+void player2Move(); // Handles player's move in Player vs Computer mode
+void computerMove(); // Calculates and executes the computer's move
+char checkWinner(); // Checks if there is a winner or if the game is a draw
+void printWinner(char winner, char chosenMode); // Prints the winner or a draw message
+int minimax(char board[3][3], int depth, bool isMaximizing, int alpha, int beta); // Minimax algorithm to determine the best move for the computer
 
 int main()
 {
@@ -46,6 +48,7 @@ int main()
 
         if (chosenMode == '0')
         {
+            // Display the game title and menu
             cout << " _   _      _             _             \n"
                     "| | (_)    | |           | |            \n"
                     "| |_ _  ___| |_ __ _  ___| |_ ___   ___ \n"
@@ -97,9 +100,9 @@ int main()
             {
                 if (chosenMode == '1')
                 {
+                    // Display the current board and past moves in Player vs Player mode
                     cout << endl;
-                    cout << "\n"
-                         << endl;
+                    cout << "\n" << endl;
                     printBoard();
                     printPastMoves(chosenMode);
                     if (currentPlayerPvP == PLAYER)
@@ -115,9 +118,9 @@ int main()
                 }
                 else if (chosenMode == '2')
                 {
+                    // Display the current board and past moves in Player vs Computer mode
                     cout << endl;
-                    cout << "\n"
-                         << endl;
+                    cout << "\n" << endl;
                     printBoard();
                     printPastMoves(chosenMode);
                     if (currentPlayerPvC == PLAYER)
@@ -132,7 +135,7 @@ int main()
                     }
                 }
 
-                winner = checkWinner();
+                winner = checkWinner(); // Check if there's a winner or draw
                 if (chosenMode == '1')
                 {
                     currentPlayerPvP = (currentPlayerPvP == PLAYER) ? 'O' : PLAYER;
@@ -160,6 +163,7 @@ int main()
     } while (true); // Keep asking for mode choice until the user selects to quit
 }
 
+// Reset the game board to its initial state
 void resetBoard()
 {
     for (auto &i : board)
@@ -171,6 +175,7 @@ void resetBoard()
     }
 }
 
+// Print the current state of the game board
 void printBoard()
 {
     cout << endl;
@@ -183,6 +188,7 @@ void printBoard()
     cout << "   |   |   " << endl;
 }
 
+// Print the past moves made by players
 void printPastMoves(char mode)
 {
     cout << "Past Moves:" << endl;
@@ -217,6 +223,7 @@ void printPastMoves(char mode)
     cout << endl;
 }
 
+// Check the number of empty spaces left on the board
 int checkFreeSpaces()
 {
     int freeSpaces = 0;
@@ -234,6 +241,7 @@ int checkFreeSpaces()
     return freeSpaces;
 }
 
+// Handle player's move in Player vs Player mode
 void playerMove()
 {
     int row, column;
@@ -270,6 +278,7 @@ void playerMove()
     }
 }
 
+// Handle player's move in Player vs Computer mode
 void player2Move()
 {
     int row, column;
@@ -306,25 +315,7 @@ void player2Move()
     }
 }
 
-void computerMove()
-{
-    int row, column;
-    while (true)
-    {
-        // Generate random row and column indices
-        row = rand() % 3;
-        column = rand() % 3;
-
-        // Check if the selected position is empty
-        if (board[row][column] == ' ')
-        {
-            board[row][column] = COMPUTER;
-            computerMoves.push_back(make_pair(row, column));
-            break;
-        }
-    }
-}
-
+// Check if there is a winner or if the game is a draw
 char checkWinner()
 {
     for (auto &i : board)
@@ -355,6 +346,85 @@ char checkWinner()
     return ' ';
 }
 
+// Minimax algorithm to determine the best move for the computer
+int minimax(char board[3][3], int depth, bool isMaximizing, int alpha, int beta)
+{
+    char winner = checkWinner();
+
+    // If the game is over, return the score
+    if (winner == COMPUTER) {
+        return 10;
+    } else if (winner == PLAYER) {
+        return -10;
+    } else if (checkFreeSpaces() == 0) {
+        return 0; // Draw
+    }
+
+    // If maximizing player's turn (computer)
+    if (isMaximizing) {
+        int bestScore = INT_MIN;
+        for (int i = 0; i < 3; ++i) {
+            for (int j = 0; j < 3; ++j) {
+                if (board[i][j] == ' ') {
+                    board[i][j] = COMPUTER;
+                    int score = minimax(board, depth + 1, false, alpha, beta);
+                    board[i][j] = ' '; // Undo move
+                    bestScore = max(bestScore, score);
+                    alpha = max(alpha, score);
+                    if (beta <= alpha) {
+                        break; // Beta cutoff
+                    }
+                }
+            }
+        }
+        return bestScore;
+    } else { // Minimizing player's turn (opponent)
+        int bestScore = INT_MAX;
+        for (int i = 0; i < 3; ++i) {
+            for (int j = 0; j < 3; ++j) {
+                if (board[i][j] == ' ') {
+                    board[i][j] = PLAYER;
+                    int score = minimax(board, depth + 1, true, alpha, beta);
+                    board[i][j] = ' '; // Undo move
+                    bestScore = min(bestScore, score);
+                    beta = min(beta, score);
+                    if (beta <= alpha) {
+                        break; // Alpha cutoff
+                    }
+                }
+            }
+        }
+        return bestScore;
+    }
+}
+
+// Execute the computer's move
+void computerMove()
+{
+    int bestScore = INT_MIN;
+    pair<int, int> bestMove = {-1, -1};
+
+    // Traverse all cells, evaluate minimax function for all empty cells.
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            if (board[i][j] == ' ') {
+                board[i][j] = COMPUTER;
+                int score = minimax(board, 0, false, INT_MIN, INT_MAX);
+                board[i][j] = ' '; // Undo move
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMove = {i, j};
+                }
+            }
+        }
+    }
+
+    // Make the best move found by the minimax algorithm
+    board[bestMove.first][bestMove.second] = COMPUTER;
+    computerMoves.push_back(bestMove);
+}
+
+// Print the winner or a draw message
 void printWinner(char winner, char chosenMode)
 {
     if (chosenMode == '1') // Player vs Player mode
