@@ -1,4 +1,8 @@
-# tic-tac-toe-c-
+# Tic-Tac-Toe-C++-
 
-A c++ program that simulates the game tic-tac-toe. The user competes with the computer to see who could win three in a row. 
-User will enter a certain position, given what row and colum they would like whereas the computer randomly chooses using the srand() and rand() functions.
+A  C++ program that simulates the game Tic-Tac-Toe. The user will be given two choices:
+
+Player vs Player (PvP)
+Player vs Computer (PvE)
+
+The user will compete against another player or the computer, depending on the option selected. When playing, the user enters a position and specifies which row and column they want, and the computer chooses the best position available using the Minimax Algorithm. Once completed, the user will be given the option to replay the game. If not, the program will end.
